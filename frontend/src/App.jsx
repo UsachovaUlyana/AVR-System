@@ -17,7 +17,7 @@ import ExecutorOrderManage from './pages/executor/OrderManage';
 export default function App() {
   return (
     <AppProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/AVR-System">
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
