@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: avr-postgres
+    environment:
+      POSTGRES_USER: avr
+      POSTGRES_PASSWORD: avrpass
+      POSTGRES_DB: avr_system
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avr -d avr_system"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: avr-backend
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: avr
+      POSTGRES_PASSWORD: avrpass
+      POSTGRES_DB: avr_system
+      SESSION_SECRET: avr-super-secret
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  frontend:
+    build: ./frontend
+    container_name: avr-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
